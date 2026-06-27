@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -19,28 +20,25 @@ public class ResearchService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.webClient = webClientBuilder.build();
+    public ResearchService(WebClient.Builder builder, ObjectMapper objectMapper) {
+        this.webClient = builder.build();
         this.objectMapper = objectMapper;
     }
 
     public String processContent(ResearchRequest request) {
 
-        // Build the prompt
         String prompt = buildPrompt(request);
 
-        // Request body for Gemini API
         Map<String, Object> requestBody = Map.of(
-                "contents", new Object[]{
+                "contents", List.of(
                         Map.of(
-                                "parts", new Object[]{
+                                "parts", List.of(
                                         Map.of("text", prompt)
-                                }
+                                )
                         )
-                }
+                )
         );
 
-        // Call Gemini API
         String response = webClient.post()
                 .uri(geminiApiUrl + geminiApiKey)
                 .bodyValue(requestBody)
@@ -48,57 +46,61 @@ public class ResearchService {
                 .bodyToMono(String.class)
                 .block();
 
-        // Extract and return generated text
+        System.out.println("========== GEMINI RESPONSE ==========");
+        System.out.println(response);
+        System.out.println("=====================================");
+
         return extractTextFromResponse(response);
     }
 
     private String extractTextFromResponse(String response) {
+
         try {
+
             GeminiResponse geminiResponse =
                     objectMapper.readValue(response, GeminiResponse.class);
 
-            if (geminiResponse.getCandidateList() != null
-                    && !geminiResponse.getCandidateList().isEmpty()) {
+            if (geminiResponse.getCandidates() != null &&
+                    !geminiResponse.getCandidates().isEmpty()) {
 
-                GeminiResponse.Candidate firstCandidate =
-                        geminiResponse.getCandidateList().get(0);
+                GeminiResponse.Candidate candidate =
+                        geminiResponse.getCandidates().get(0);
 
-                if (firstCandidate.getContent() != null
-                        && firstCandidate.getContent().getParts() != null
-                        && !firstCandidate.getContent().getParts().isEmpty()) {
+                if (candidate.getContent() != null &&
+                        candidate.getContent().getParts() != null &&
+                        !candidate.getContent().getParts().isEmpty()) {
 
-                    return firstCandidate.getContent()
+                    return candidate.getContent()
                             .getParts()
                             .get(0)
                             .getText();
                 }
             }
 
-        } catch (Exception e) {
-            return "Error Parsing Response: " + e.getMessage();
-        }
+            return "No response generated.";
 
-        return "No response generated";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error Parsing Response : " + e.getMessage();
+        }
     }
 
     private String buildPrompt(ResearchRequest request) {
 
         StringBuilder prompt = new StringBuilder();
 
-        switch (request.getOperation()) {
+        switch (request.getOperation().toLowerCase()) {
 
             case "summarize":
-                prompt.append("Provide a clear and concise summary of the following text:\n\n");
+                prompt.append("Summarize the following content:\n\n");
                 break;
 
             case "suggest":
-                prompt.append("Provide suggestions and improvements for the following text:\n\n");
+                prompt.append("Give suggestions to improve the following content:\n\n");
                 break;
 
             default:
-                throw new IllegalArgumentException(
-                        "Unknown operation: " + request.getOperation()
-                );
+                throw new IllegalArgumentException("Invalid Operation");
         }
 
         prompt.append(request.getContent());
