@@ -1,5 +1,7 @@
-package com.research_assistent;
+package com.research_assistent.controller;
 
+import com.research_assistent.dto.ResearchRequest;
+import com.research_assistent.ResearchService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

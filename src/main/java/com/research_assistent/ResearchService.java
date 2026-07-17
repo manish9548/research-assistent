@@ -1,6 +1,8 @@
 package com.research_assistent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.research_assistent.dto.GeminiResponse;
+import com.research_assistent.dto.ResearchRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,7 +22,7 @@ public class ResearchService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    public ResearchService(WebClient.Builder builder, ObjectMapper objectMapper) {
+    public ResearchService(WebClient.Builder builder,  ObjectMapper objectMapper) {
         this.webClient = builder.build();
         this.objectMapper = objectMapper;
     }

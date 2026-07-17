@@ -1,4 +1,4 @@
-package com.research_assistent;
+package com.research_assistent.dto;
 
 import lombok.Data;
 
