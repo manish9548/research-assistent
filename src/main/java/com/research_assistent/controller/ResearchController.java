@@ -1,7 +1,9 @@
 package com.research_assistent.controller;
 
 import com.research_assistent.dto.ResearchRequest;
-import com.research_assistent.ResearchService;
+import com.research_assistent.dto.ResearchResponse;
+import com.research_assistent.service.ResearchService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class ResearchController {
     private final ResearchService researchService;
 
-    @PostMapping("/process")
-    public ResponseEntity<String> processContent(@RequestBody ResearchRequest request){
-        String result = researchService.processContent(request);
-        return ResponseEntity.ok(result) ;
-
+    @PostMapping
+    public ResponseEntity<ResearchResponse> processContent(
+            @RequestBody @Valid ResearchRequest request){
+        return ResponseEntity.ok(
+                researchService.processContent(request)
+        );
     }
 
 
