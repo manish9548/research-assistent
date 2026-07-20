@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PromptBuilder {
 
-    private final PromptBuilder promptBuilder;
-
     public String buildPrompt(ResearchRequest request) {
 
         StringBuilder prompt = new StringBuilder();

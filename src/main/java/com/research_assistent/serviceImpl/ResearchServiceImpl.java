@@ -18,7 +18,18 @@ public class ResearchServiceImpl implements ResearchService {
     @Override
     public ResearchResponse processContent(ResearchRequest request) {
 
-        return null;
+        long startTime = System.currentTimeMillis();
+
+        String prompt = promptBuilder.buildPrompt(request);
+
+        String response = geminiClient.generateContent(prompt);
+
+        long endTime = System.currentTimeMillis();
+
+        return ResearchResponse.builder()
+                .operation(request.getOperation())
+                .result(response)   // Abhi raw JSON return hoga
+                .processingTime(endTime - startTime)
+                .build();
     }
 }
-

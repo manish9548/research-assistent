@@ -12,7 +12,7 @@ public class ResearchResponse {
 
     private String result;
 
-    private Long processTime;
+    private Long processingTime;
 
 
 }
