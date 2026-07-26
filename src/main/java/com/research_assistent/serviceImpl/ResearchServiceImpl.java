@@ -3,6 +3,7 @@ package com.research_assistent.serviceImpl;
 import com.research_assistent.client.GeminiClient;
 import com.research_assistent.dto.ResearchRequest;
 import com.research_assistent.dto.ResearchResponse;
+import com.research_assistent.parser.ResponseParser;
 import com.research_assistent.service.ResearchService;
 import com.research_assistent.util.PromptBuilder;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ public class ResearchServiceImpl implements ResearchService {
 
     private final GeminiClient geminiClient;
     private final PromptBuilder promptBuilder;
+    private final ResponseParser responseParser;
 
     @Override
     public ResearchResponse processContent(ResearchRequest request) {
@@ -22,13 +24,15 @@ public class ResearchServiceImpl implements ResearchService {
 
         String prompt = promptBuilder.buildPrompt(request);
 
-        String response = geminiClient.generateContent(prompt);
+        String jsonResponse = geminiClient.generateContent(prompt);
+
+        String result = responseParser.extractText(jsonResponse);
 
         long endTime = System.currentTimeMillis();
 
         return ResearchResponse.builder()
                 .operation(request.getOperation())
-                .result(response)   // Abhi raw JSON return hoga
+                .result(result)
                 .processingTime(endTime - startTime)
                 .build();
     }
